@@ -1,4 +1,4 @@
-from hw1.src.task3 import pos_neg_zero, print_ten_primes, sum_to_hundred
+from homework1.src.task3 import pos_neg_zero, print_ten_primes, sum_to_hundred
 
 def test_positive():
     assert pos_neg_zero(1) == "Positive"

@@ -1,4 +1,4 @@
-from hw1.src.task5 import book_list, student_dict
+from homework1.src.task5 import book_list, student_dict
 
 def test_books():
     assert book_list() == ["To Kill a Mocking Bird by Harper Lee", "Pride and Prejudice by Jane Austen", "The Great Gatsby by F. Scott Fitzgerald"]

@@ -1,4 +1,4 @@
-from hw1.src.task4 import calculate_discount
+from homework1.src.task4 import calculate_discount
 
 def test_int_float():
     assert calculate_discount(10, 0.5) == 5.0
