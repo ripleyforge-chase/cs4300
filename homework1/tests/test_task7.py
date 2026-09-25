@@ -1,6 +1,6 @@
 import torch
 
-from hw1.src.task7 import (
+from homework1.src.task7 import (
     Translator, build_vocab, decoder_input, encode, tokenize, train_epoch, translate,
 )
 
