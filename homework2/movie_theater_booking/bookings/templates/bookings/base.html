@@ -1,0 +1,35 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Now showing{% endblock %} | Frame Cinema</title>
+  <link href="{% static 'bookings/vendor/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'bookings/cinema.css' %}" rel="stylesheet">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <nav class="container nav-wrap" aria-label="Main navigation">
+    <a class="brand" href="{% url 'movie_list' %}" aria-label="Frame Cinema home"><span class="brand-mark" aria-hidden="true">f.</span>frame<span class="brand-sub">cinema</span></a>
+    <div class="nav-links">
+      <a href="{% url 'movie_list' %}" {% if request.resolver_match.url_name == 'movie_list' %}aria-current="page"{% endif %}>Now showing</a>
+      {% if user.is_authenticated %}
+      <a href="{% url 'booking_history' %}" {% if request.resolver_match.url_name == 'booking_history' %}aria-current="page"{% endif %}>My tickets</a>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="nav-signout" type="submit">Sign out</button></form>
+      {% else %}
+      <a href="{% url 'login' %}">Sign in</a>
+      <a class="btn btn-sm btn-primary" href="{% url 'signup' %}">Create account</a>
+      {% endif %}
+    </div>
+  </nav>
+</header>
+<main id="main" class="container page-content">
+  {% for message in messages %}<div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}" role="status">{{ message }}</div>{% endfor %}
+  {% block content %}{% endblock %}
+</main>
+<footer class="container site-footer"><span>Frame Cinema <span aria-hidden="true">/</span> A little escape. A great story.</span><span>Course demo · Fictional screenings · No payments</span></footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,11 @@
+{% extends 'bookings/base.html' %}
+{% block title %}My tickets{% endblock %}
+{% block content %}
+<div class="section-heading history-heading"><div><h1>My tickets.</h1><p>Good evenings, all lined up. Signed in as {{ user.username }}.</p></div><a class="btn btn-outline-primary" href="{% url 'movie_list' %}">Find another film</a></div>
+{% for booking in bookings %}
+<article class="booking-ticket">
+  <div class="ticket-main"><span class="ticket-label">Booking #{{ booking.id }}</span><h2>{{ booking.movie.title }}</h2><p>{{ booking.movie.duration }} minutes · Single showing</p><small>Booked {{ booking.booking_date|date:'M j, Y, g:i a' }}</small></div>
+  <div class="ticket-stub"><span>Seat</span><strong>{{ booking.seat.seat_number }}</strong><form method="post" action="{% url 'cancel_booking' booking.id %}">{% csrf_token %}<button type="submit" class="btn btn-sm btn-outline-secondary">Cancel booking</button></form></div>
+</article>
+{% empty %}<section class="empty-state"><div class="empty-ticket" aria-hidden="true">f.</div><h2>Your next story is waiting.</h2><p>You haven't booked a seat yet. Explore the lineup and find something you'll love.</p><a class="btn btn-primary" href="{% url 'movie_list' %}">Explore the films</a></section>{% endfor %}
+{% endblock %}

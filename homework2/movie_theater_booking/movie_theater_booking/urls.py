@@ -10,6 +10,8 @@ router.register("seats", SeatViewSet, basename="seat")
 router.register("bookings", BookingViewSet, basename="booking")
 
 urlpatterns = [
+    path("", include("bookings.urls")),
+    path("accounts/", include("django.contrib.auth.urls")),
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
     path("api-auth/", include("rest_framework.urls")),

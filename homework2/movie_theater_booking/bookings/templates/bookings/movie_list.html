@@ -1,0 +1,27 @@
+{% extends 'bookings/base.html' %}
+{% load static %}
+{% block content %}
+<section class="marquee">
+  <div><p class="marquee-note">Your next movie night</p><h1>Good stories.<br>Great seats.</h1><p>Find your film, choose your spot, and settle in.</p><a href="#films" class="btn btn-light">Explore the films</a></div>
+  <div class="marquee-art" aria-hidden="true"><div class="film-frame"><span>Take a seat.</span><div class="seat-illustration"><i></i><i></i><i></i></div><small>We'll bring the story.</small></div></div>
+</section>
+<section id="films" class="film-section">
+  <div class="section-heading"><div><h2>Now showing</h2><p>One screening per film. Your seat is waiting.</p></div>
+    <form class="search-form" method="get" role="search"><label class="visually-hidden" for="search">Search films</label><input class="form-control" id="search" type="search" name="q" placeholder="Find a film" value="{{ query }}"><button class="btn btn-outline-primary" type="submit">Search</button></form>
+  </div>
+  <div class="row g-4">
+  {% for movie in movies %}
+    <article class="col-md-4 film-card">
+      <a class="poster-link" href="{% url 'book_seat' movie.id %}" aria-label="Choose seats for {{ movie.title }}">
+      {% if movie.title == 'The Last Orbit' %}<img class="movie-poster" src="{% static 'bookings/posters/orbit.svg' %}" alt="The Last Orbit: a golden planet beyond a blue horizon">
+      {% elif movie.title == 'Coastline' %}<img class="movie-poster" src="{% static 'bookings/posters/coastline.svg' %}" alt="Coastline: a sun setting over ocean waves">
+      {% elif movie.title == 'Midnight Express' %}<img class="movie-poster" src="{% static 'bookings/posters/midnight.svg' %}" alt="Midnight Express: train windows passing through the night">
+      {% else %}<div class="poster-placeholder">{{ movie.title }}</div>{% endif %}</a>
+      <div class="film-meta"><span>{{ movie.release_date|date:'Y' }}</span><span>{{ movie.duration }} min</span><span class="availability">{{ movie.available_seats }} seats left</span></div>
+      <h3>{{ movie.title }}</h3><p class="film-description">{{ movie.description }}</p>
+      <a class="btn btn-outline-primary w-100" href="{% url 'book_seat' movie.id %}">{% if movie.available_seats %}Choose seats{% else %}View screening{% endif %}</a>
+    </article>
+  {% empty %}<div class="empty-state"><h3>No films found</h3><p>{% if query %}Try another title or <a href="{% url 'movie_list' %}">see all films</a>.{% else %}The next lineup is on its way. Check back soon.{% endif %}</p></div>{% endfor %}
+  </div>
+</section>
+{% endblock %}

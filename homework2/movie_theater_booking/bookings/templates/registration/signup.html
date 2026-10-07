@@ -1,0 +1,6 @@
+{% extends 'bookings/base.html' %}
+{% block title %}Create an account{% endblock %}
+{% block content %}<section class="auth-panel"><h1>Make it a movie night.</h1><p>Create an account to save your seat. No email needed.</p>
+<form method="post">{% csrf_token %}{{ form.non_field_errors }}
+{% for field in form %}<div class="mb-3"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}{% if field.help_text %}<div class="form-text">{{ field.help_text|safe }}</div>{% endif %}</div>{% endfor %}
+<button class="btn btn-primary w-100" type="submit">Create account</button></form><p class="mt-4 mb-0">Already have an account? <a href="{% url 'login' %}">Sign in</a>.</p></section>{% endblock %}
