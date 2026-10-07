@@ -1,0 +1,26 @@
+{% extends 'bookings/base.html' %}
+{% load static %}
+{% block title %}Choose your seat{% endblock %}
+{% block content %}
+<a class="back-link" href="{% url 'movie_list' %}">‹ All films</a>
+<div class="booking-heading"><h1>Choose your seat.</h1><p>The best part of the evening starts right here.</p></div>
+<form method="post" class="booking-layout" id="seat-form">{% csrf_token %}
+  <section class="auditorium" aria-label="Seat selection">
+    {% if form.errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors }}{{ form.seat.errors }}</div>{% endif %}
+    <div class="screen">Screen</div>
+    <fieldset><legend class="visually-hidden">Choose one available seat</legend><div class="seat-grid">
+    {% for seat in seats %}
+      <div class="seat-cell"><input class="seat-radio" id="seat-{{ seat.id }}" type="radio" name="seat" value="{{ seat.id }}" data-number="{{ seat.seat_number }}" {% if seat.booking_status %}disabled{% else %}required{% endif %} {% if form.seat.value|stringformat:'s' == seat.id|stringformat:'s' and not seat.booking_status %}checked{% endif %}>
+      <label class="seat-label" for="seat-{{ seat.id }}" title="{{ seat.seat_number }}{% if seat.booking_status %} — booked{% endif %}">{{ seat.seat_number }}{% if seat.booking_status %}<span class="visually-hidden"> (booked)</span>{% endif %}</label></div>
+    {% empty %}<p>No seats have been added for this screening.</p>{% endfor %}
+    </div></fieldset>
+    <div class="seat-legend"><span><i class="legend-open"></i>Available</span><span><i class="legend-selected"></i>Selected</span><span><i class="legend-booked"></i>Booked</span></div>
+    <p class="seat-note">Rows A–D run from the screen to the back.</p>
+  </section>
+  <aside class="ticket-summary"><p class="ticket-label">Your movie night</p><h2>{{ movie.title }}</h2><p>{{ movie.release_date|date:'Y' }} · {{ movie.duration }} minutes</p><hr><dl><div><dt>Screening</dt><dd>Single showing</dd></div><div><dt>Seat</dt><dd id="selected-seat" aria-live="polite">Choose a seat</dd></div><div><dt>Available</dt><dd>{{ available_count }} seats</dd></div></dl>
+    {% if available_count %}<button type="submit" class="btn btn-primary w-100">Book this seat</button><p class="small mt-3 mb-0">Your ticket will appear in My tickets. You can cancel there at any time.</p>
+    {% else %}<div class="alert alert-secondary">This screening is fully booked.</div><a href="{% url 'movie_list' %}" class="btn btn-outline-primary w-100">Find another film</a>{% endif %}
+  </aside>
+</form>
+{% endblock %}
+{% block scripts %}<script src="{% static 'bookings/seats.js' %}" defer></script>{% endblock %}
