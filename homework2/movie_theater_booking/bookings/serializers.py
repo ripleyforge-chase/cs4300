@@ -20,6 +20,8 @@ class SeatSerializer(serializers.ModelSerializer):
 
 
 class BookingSerializer(serializers.ModelSerializer):
+    """Validate the movie/seat pair and assign ownership from the request user."""
+
     movie_title = serializers.CharField(source="movie.title", read_only=True)
     seat_number = serializers.CharField(source="seat.seat_number", read_only=True)
     # Uniqueness is handled atomically by reserve_seat with a useful error.

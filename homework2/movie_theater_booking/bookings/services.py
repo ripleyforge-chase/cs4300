@@ -6,6 +6,12 @@ from .models import Booking
 
 
 def reserve_seat(*, movie, seat, user):
+    """Reserve a matching movie/seat pair for an authenticated caller's user.
+
+    The unique seat constraint prevents simultaneous requests from double-booking.
+    A duplicate becomes a validation error for both the API and HTML form; other
+    database errors propagate so unexpected failures are not reported as sold out.
+    """
     if seat.movie_id != movie.pk:
         raise ValidationError("This seat belongs to a different movie.")
     try:

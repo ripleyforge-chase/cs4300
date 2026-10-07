@@ -8,7 +8,7 @@ Repository: https://github.com/ripleyforge-chase/cs4300
 **Live Render app: https://chase-cs4300-cinema.onrender.com/**
 
 Deployed and verified on October 6, 2026 using a free Render web service and
-PostgreSQL database. Nothing has been submitted to Canvas.
+PostgreSQL database.
 
 ## What the application does
 
@@ -22,14 +22,13 @@ PostgreSQL database. Nothing has been submitted to Canvas.
   requests, and attempts to access another user's tickets.
 
 Each movie represents **one screening**, with its own A1-D8 seat inventory.
-The assignment does not define showtimes, so this implementation does not invent
-schedules. Each `Seat` belongs to a movie; `Booking` records movie, seat, user,
-and booking date. `booking_status` is a read-only property derived from the
+There are no separate showtimes in this version. Each `Seat` belongs to a movie;
+`Booking` records movie, seat, user, and booking date. `booking_status` is a read-only property derived from the
 booking relationship, so it cannot disagree with the reservation. A database
 one-to-one constraint prevents two bookings for the same seat. Both the HTML
 views and API call `reserve_seat()` in `bookings/services.py`.
 
-## Local setup (replaces DevEDU)
+## Local setup
 
 Python 3.13 is recommended; this project was verified with Python 3.13.13.
 Run these commands from the repository root (the folder containing `homework2`):
@@ -63,6 +62,25 @@ SQLite stores local data in `db.sqlite3`; this file is intentionally not committ
 or packaged. Bootstrap CSS, custom styles, JavaScript, and authored SVG posters
 are all local static assets. Once dependencies are installed, the local app
 works without an internet connection.
+
+### Optional DevEDU run instructions
+
+The project was developed and tested locally and on Render. DevEDU is not needed
+for the local setup, but the same Django project can be started there for course
+review. Clone this repository, install the dependencies, and run the migrations,
+`seed_demo`, and `collectstatic` commands above. Then, with the virtual environment
+active, run from `homework2/movie_theater_booking`:
+
+```sh
+# Replace this example with the hostname shown by DevEDU's App button.
+export DJANGO_ALLOWED_HOSTS="app-your-container-your-section.devedu.io"
+python manage.py runserver 0.0.0.0:3000
+```
+
+Open the **App** button in the DevEDU dashboard. The host value must contain only
+the actual hostname, without `https://` or a trailing slash. Django uses it for
+host validation and the HTTPS CSRF origin. These instructions are provided for
+compatibility; the project has not been run or uploaded in DevEDU.
 
 ## Pages and API
 
@@ -107,6 +125,19 @@ curl -u YOUR_USERNAME -H 'Content-Type: application/json' \
 curl -u YOUR_USERNAME http://127.0.0.1:8000/api/bookings/
 ```
 
+### How a booking request works
+
+1. The viewset routes the API request and checks access. `BookingViewSet` filters
+   every lookup to the signed-in user.
+2. `BookingSerializer` validates that the seat belongs to the selected movie and
+   takes the user from the authenticated request, not from submitted JSON.
+3. `reserve_seat()` inserts the booking in a transaction. The database's unique
+   seat constraint prevents two requests from reserving the same seat, and a
+   duplicate is returned as a validation error.
+4. The HTML booking form calls the same service, so the website and API follow
+   the same rules. Deleting a booking makes its seat available again because
+   availability is derived from whether a booking exists.
+
 ## Tests and coverage
 
 With the virtual environment active, run from `homework2/movie_theater_booking`:
@@ -129,22 +160,12 @@ for movie discovery, HTML booking/API history, duplicate prevention, private
 history, cancellation, and anonymous booking rejection. It uses Django's test
 clients and a disposable test database, not a browser driver or the local demo DB.
 
-Verified on October 6, 2026:
-
-- 28 Django unit/integration tests passed.
-- 6 Behave scenarios / 32 steps passed.
-- 99% combined statement/branch coverage of `bookings` (224/225 statements and
-  28/28 branches). Tests and generated migrations are excluded. The only
-  uncovered statement is the admin's add-booking restriction.
-- A fresh virtual environment installed the pinned requirements successfully.
-- Render build/start scripts passed locally with `DEBUG=0`, Gunicorn, hashed
-  static assets, and an isolated SQLite database.
-- Hosted PostgreSQL migrations and sample-data setup passed on Render. The live
-  health endpoint, movie API, signup, seat booking, ticket history, cancellation,
-  and sign-out were verified. The seat API reflected both booking and cancellation.
-- Chrome walkthrough passed: signup, choose B4, book, view history, cancel.
-- Movie listings and seat selection fit a 390 CSS-pixel viewport without
-  horizontal overflow.
+The test suite passes with 28 Django tests and six Behave scenarios (32 steps).
+Coverage is 99% for the booking app, excluding test code and generated migrations;
+`.coveragerc` enforces the assignment's 80% minimum. The browser flow has also been
+checked on desktop and at a 390-pixel mobile width. On Render, signup, booking,
+history, cancellation, the health endpoint, and API seat availability have been
+verified together.
 
 ## Render deployment and recreation
 
@@ -152,17 +173,15 @@ The repository-root `render.yaml` defines one free Python web service and one
 free PostgreSQL database, both in Oregon. Automatic deployments are disabled.
 No CI/CD workflow is included.
 
-The deployed application source is commit `d5b6160` on
-`homework2/movie-theater`. Subsequent README-only commits do not change the
-running application. Render reported **Deploy succeeded / Live**; the service
-uses `chase-cs4300-cinema-db` (PostgreSQL 18). A synthetic `deployment-check`
-account was used for the live walkthrough; its test ticket was canceled and
-the browser was signed out. No real personal data was used.
+The service runs from `main` and uses `chase-cs4300-cinema-db` (PostgreSQL 18).
+After merging application changes, use **Manual Deploy > Deploy latest commit**
+in Render, then check `/health/` and the affected pages. Pushing a commit alone
+does not update the live app because automatic deployment is off.
 
 To recreate this deployment:
 
 1. Sign in to Render and choose **New > Blueprint**. Select this repository and
-   the `homework2/movie-theater` branch (or `main` after the homework PR is merged).
+   the `main` branch.
 2. Use the repository-root `render.yaml`. Review that both plans are **Free**.
    The blueprint sets the root directory to `homework2`, build command to
    `bash build.sh`, and start command to `bash start.sh`.
@@ -173,17 +192,15 @@ To recreate this deployment:
    Startup runs migrations, seeds the sample movies/seats, and starts Gunicorn.
 5. Open the actual `.onrender.com` URL displayed by Render. Check `/health/`,
    the movie list, signup, booking, history, cancellation, and `/api/movies/`.
-   If the new deployment has a different URL, update this README and regenerate
-   the source ZIP.
+   Update the live URL in this README if it changes, then regenerate the ZIP.
 
 PostgreSQL is necessary on Render because free web-service filesystem changes,
 including SQLite databases, are lost on restarts. **Free Render PostgreSQL expires
-30 days after creation**, and free web services sleep when idle, so schedule the
-deployment to cover grading. See [Render's free-service documentation](https://render.com/docs/free).
-The operator created the Render account. This task created the two free
-resources from the Blueprint; no paid plan was selected. To stop the app without
-deleting its database, suspend the web service in Render. Keep the database
-expiration in mind when scheduling grading.
+30 days after creation** (around November 5, 2026 for this database). Free web
+services also sleep when idle, so the first request can take about a minute.
+Keep the database expiration in mind when scheduling grading. See
+[Render's free-service documentation](https://render.com/docs/free).
+To stop the app without deleting its database, suspend the web service in Render.
 
 For a manual web-service setup, use the same commands and environment variables
 above. If the custom hostname differs, set `DJANGO_ALLOWED_HOSTS` to its hostname
@@ -223,21 +240,21 @@ git archive --format=zip --prefix=cs4300-homework2/ \
 ```
 
 This includes source, migrations, tests, templates, static assets, requirements,
-and deployment instructions with the verified live URL. It excludes virtual environments, databases, users,
-passwords, caches, and generated static files. Rebuild after any later source or URL changes.
-Upload to Canvas only when you choose to submit; this work does not submit it.
+and deployment instructions with the live URL. It excludes virtual environments,
+databases, passwords, caches, and generated static files. Rebuild the ZIP after
+source or URL changes.
 
 ## AI assistance and references
 
 OpenAI Codex was used to interpret the assignment, design the data model and
 interface, generate the Django/DRF implementation, author the fictional movie
 copy and SVG artwork, write tests and Behave scenarios, debug failures, prepare
-Render configuration, deploy through the operator's Render session, verify the
-hosted application, and draft this README. AI-generated code was incorporated
-directly and iteratively exercised with automated tests and a Chrome walkthrough.
-This disclosure does not imply that a separate human review has occurred.
+Render configuration, deploy and check the hosted app, and draft this README.
+The generated code is included in the project and was revised during automated
+testing and browser checks.
 
 References used:
+
 - [Assignment PDF](https://tghastings.github.io/cs4300andcs5300/homework_2.pdf)
 - [Django 5.2 documentation](https://docs.djangoproject.com/en/5.2/)
 - [DRF viewsets](https://www.django-rest-framework.org/api-guide/viewsets/)
