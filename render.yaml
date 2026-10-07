@@ -1,0 +1,31 @@
+# Optional coursework deployment. Both resources explicitly use free plans.
+services:
+  - type: web
+    name: chase-cs4300-cinema
+    runtime: python
+    plan: free
+    region: oregon
+    rootDir: homework2
+    buildCommand: bash build.sh
+    startCommand: bash start.sh
+    healthCheckPath: /health/
+    autoDeployTrigger: "off"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.13
+      - key: DJANGO_DEBUG
+        value: "0"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: chase-cs4300-cinema-db
+          property: connectionString
+
+databases:
+  - name: chase-cs4300-cinema-db
+    plan: free
+    region: oregon
+    databaseName: cinema
+    user: cinema
+    ipAllowList: []
