@@ -5,10 +5,10 @@ Django 5.2, Django REST Framework, Bootstrap 5.3, and Behave.
 
 Repository: https://github.com/ripleyforge-chase/cs4300
 
-**Render URL: pending operator deployment.** The deployment configuration is
-prepared; no live Render deployment or URL is claimed. After deploying, replace
-this line with the actual URL from the Render dashboard and recreate the ZIP.
-Nothing has been submitted to Canvas.
+**Live Render app: https://chase-cs4300-cinema.onrender.com/**
+
+Deployed and verified on October 6, 2026 using a free Render web service and
+PostgreSQL database. Nothing has been submitted to Canvas.
 
 ## What the application does
 
@@ -138,17 +138,28 @@ Verified on October 6, 2026:
   uncovered statement is the admin's add-booking restriction.
 - A fresh virtual environment installed the pinned requirements successfully.
 - Render build/start scripts passed locally with `DEBUG=0`, Gunicorn, hashed
-  static assets, and an isolated SQLite database. Hosted PostgreSQL remains
-  unverified until operator deployment.
+  static assets, and an isolated SQLite database.
+- Hosted PostgreSQL migrations and sample-data setup passed on Render. The live
+  health endpoint, movie API, signup, seat booking, ticket history, cancellation,
+  and sign-out were verified. The seat API reflected both booking and cancellation.
 - Chrome walkthrough passed: signup, choose B4, book, view history, cancel.
 - Movie listings and seat selection fit a 390 CSS-pixel viewport without
   horizontal overflow.
 
-## Render setup (operator completes this step)
+## Render deployment and recreation
 
 The repository-root `render.yaml` defines one free Python web service and one
 free PostgreSQL database, both in Oregon. Automatic deployments are disabled.
 No CI/CD workflow is included.
+
+The deployed application source is commit `d5b6160` on
+`homework2/movie-theater`. Subsequent README-only commits do not change the
+running application. Render reported **Deploy succeeded / Live**; the service
+uses `chase-cs4300-cinema-db` (PostgreSQL 18). A synthetic `deployment-check`
+account was used for the live walkthrough; its test ticket was canceled and
+the browser was signed out. No real personal data was used.
+
+To recreate this deployment:
 
 1. Sign in to Render and choose **New > Blueprint**. Select this repository and
    the `homework2/movie-theater` branch (or `main` after the homework PR is merged).
@@ -162,13 +173,17 @@ No CI/CD workflow is included.
    Startup runs migrations, seeds the sample movies/seats, and starts Gunicorn.
 5. Open the actual `.onrender.com` URL displayed by Render. Check `/health/`,
    the movie list, signup, booking, history, cancellation, and `/api/movies/`.
-   Add that verified URL at the top of this README and regenerate the source ZIP.
+   If the new deployment has a different URL, update this README and regenerate
+   the source ZIP.
 
 PostgreSQL is necessary on Render because free web-service filesystem changes,
 including SQLite databases, are lost on restarts. **Free Render PostgreSQL expires
 30 days after creation**, and free web services sleep when idle, so schedule the
 deployment to cover grading. See [Render's free-service documentation](https://render.com/docs/free).
-No Render account, service, or database was created during this work.
+The operator created the Render account. This task created the two free
+resources from the Blueprint; no paid plan was selected. To stop the app without
+deleting its database, suspend the web service in Render. Keep the database
+expiration in mind when scheduling grading.
 
 For a manual web-service setup, use the same commands and environment variables
 above. If the custom hostname differs, set `DJANGO_ALLOWED_HOSTS` to its hostname
@@ -208,8 +223,8 @@ git archive --format=zip --prefix=cs4300-homework2/ \
 ```
 
 This includes source, migrations, tests, templates, static assets, requirements,
-and deployment instructions. It excludes virtual environments, databases, users,
-passwords, caches, and generated static files. Rebuild after adding the live URL.
+and deployment instructions with the verified live URL. It excludes virtual environments, databases, users,
+passwords, caches, and generated static files. Rebuild after any later source or URL changes.
 Upload to Canvas only when you choose to submit; this work does not submit it.
 
 ## AI assistance and references
@@ -217,7 +232,8 @@ Upload to Canvas only when you choose to submit; this work does not submit it.
 OpenAI Codex was used to interpret the assignment, design the data model and
 interface, generate the Django/DRF implementation, author the fictional movie
 copy and SVG artwork, write tests and Behave scenarios, debug failures, prepare
-Render configuration, and draft this README. AI-generated code was incorporated
+Render configuration, deploy through the operator's Render session, verify the
+hosted application, and draft this README. AI-generated code was incorporated
 directly and iteratively exercised with automated tests and a Chrome walkthrough.
 This disclosure does not imply that a separate human review has occurred.
 
