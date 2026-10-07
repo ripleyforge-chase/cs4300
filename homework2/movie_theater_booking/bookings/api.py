@@ -13,12 +13,20 @@ class StaffWriteOrReadOnly(permissions.BasePermission):
 
 
 class MovieViewSet(viewsets.ModelViewSet):
+    """Expose the movie catalog publicly and reserve CRUD writes for staff."""
+
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
     permission_classes = [StaffWriteOrReadOnly]
 
 
 class SeatViewSet(viewsets.ReadOnlyModelViewSet):
+    """List availability by movie and let signed-in users reserve a seat.
+
+    Booking goes through the shared serializer/service instead of allowing direct
+    changes to the derived booking status.
+    """
+
     serializer_class = SeatSerializer
 
     def get_queryset(self):
@@ -46,6 +54,12 @@ class SeatViewSet(viewsets.ReadOnlyModelViewSet):
 class BookingViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
                      mixins.RetrieveModelMixin, mixins.DestroyModelMixin,
                      viewsets.GenericViewSet):
+    """Create, list, retrieve, and cancel only the signed-in user's bookings.
+
+    Filtering the queryset also prevents access to another user's ticket by ID.
+    Existing reservations cannot be reassigned through update endpoints.
+    """
+
     serializer_class = BookingSerializer
     permission_classes = [permissions.IsAuthenticated]
 

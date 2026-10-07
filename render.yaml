@@ -3,6 +3,7 @@ services:
   - type: web
     name: chase-cs4300-cinema
     runtime: python
+    branch: main
     plan: free
     region: oregon
     rootDir: homework2
